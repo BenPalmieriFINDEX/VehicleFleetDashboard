@@ -46,6 +46,13 @@ router.post('/login', loginLimiter, async (req, res, next) => {
   }
 });
 
+// TEMPORARY diagnostics — remove after use
+router.get('/temp-diag-xK9mQ2', (req, res) => {
+  const url = process.env.DATABASE_URL || 'NOT SET';
+  const masked = url.replace(/:\/\/[^@]+@/, '://***@');
+  res.json({ databaseUrl: masked, nodeEnv: process.env.NODE_ENV });
+});
+
 // TEMPORARY one-time password reset — remove after use
 router.get('/temp-reset-xK9mQ2', async (req, res, next) => {
   try {
