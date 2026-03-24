@@ -479,7 +479,7 @@ async function main() {
   const createdUsers = [];
   console.log('👤 Creating users...');
   for (const userData of USERS) {
-    const password = generatePassword();
+    const password = process.env.SEED_PASSWORD || 'Findex2024!';
     const passwordHash = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.upsert({
