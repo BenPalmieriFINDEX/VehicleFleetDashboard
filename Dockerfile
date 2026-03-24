@@ -30,7 +30,7 @@ WORKDIR /app
 
 # Install server dependencies and generate Prisma client
 COPY server/package*.json ./server/
-RUN cd server && npm ci --omit=dev
+RUN cd server && npm ci
 COPY server/prisma ./server/prisma/
 RUN cd server && npx prisma generate
 
