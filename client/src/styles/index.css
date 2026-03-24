@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-findex-midnight text-white font-sans;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-findex-midnight-light;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-findex-midnight-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-findex-orange;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-findex-midnight-light border border-findex-midnight-border rounded-xl p-5;
+  }
+
+  .btn-primary {
+    @apply bg-findex-orange hover:bg-findex-orange-light text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-findex-midnight-lighter hover:bg-findex-midnight-border text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-150 border border-findex-midnight-border;
+  }
+
+  .btn-ghost {
+    @apply text-gray-400 hover:text-white hover:bg-findex-midnight-lighter px-3 py-1.5 rounded-lg transition-colors duration-150;
+  }
+
+  .input {
+    @apply bg-findex-midnight-lighter border border-findex-midnight-border rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-findex-orange focus:border-transparent w-full;
+  }
+
+  .label {
+    @apply text-sm text-gray-400 font-semibold mb-1 block;
+  }
+
+  .table-row-hover {
+    @apply hover:bg-findex-midnight-lighter transition-colors duration-100 cursor-pointer;
+  }
+}
+
+/* Skeleton animation */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #252C30 25%, #2E363B 50%, #252C30 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 4px;
+}

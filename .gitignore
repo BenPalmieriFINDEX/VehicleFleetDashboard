@@ -1,0 +1,15 @@
+node_modules/
+client/node_modules/
+server/node_modules/
+.env
+.env.local
+dist/
+client/dist/
+client/build/
+*.log
+.DS_Store
+coverage/
+.nyc_output/
+server/prisma/generated/
+uploads/
+exports/

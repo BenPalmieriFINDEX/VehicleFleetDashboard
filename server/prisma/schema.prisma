@@ -1,0 +1,304 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  role         String   @default("admin")
+  passwordHash String   @map("password_hash")
+  lastLogin    DateTime? @map("last_login")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  odometerReadings      OdometerReading[]
+  personalUseFlags      PersonalUseFlag[]  @relation("FlaggedBy")
+  resolvedFlags         PersonalUseFlag[]  @relation("ResolvedBy")
+  auditLogs             AuditLog[]
+  importRecords         AccountStatementImport[]
+  usageLogEntries       VehicleUsageLog[]
+  vehicleNotes          VehicleNote[]
+
+  @@map("users")
+}
+
+model Vehicle {
+  id                       String   @id @default(cuid())
+  registration             String   @unique
+  contractRef              String?  @map("contract_ref")
+  make                     String?
+  model                    String?
+  variant                  String?
+  modelYear                Int?     @map("model_year")
+  assetClass               String?  @map("asset_class")
+  transmissionType         String?  @map("transmission_type")
+  bodyType                 String?  @map("body_type")
+  colour                   String?
+  driveType                String?  @map("drive_type")
+  state                    String?
+  country                  String?  @default("AU")
+  engineType               String?  @map("engine_type")
+  fuelType                 String?  @map("fuel_type")
+  co2Emissions             Float?   @map("co2_emissions")
+  vin                      String?
+  tareKg                   Float?   @map("tare_kg")
+  gvmKg                    Float?   @map("gvm_kg")
+  buildDate                DateTime? @map("build_date")
+  vehicleWarranty          String?  @map("vehicle_warranty")
+  engineNumber             String?  @map("engine_number")
+  numCylinders             Int?     @map("num_cylinders")
+  company                  String?
+  customerCostCentre       String?  @map("customer_cost_centre")
+  location                 String?
+  takeHome                 Boolean  @default(false) @map("take_home")
+  contractTerm             Int?     @map("contract_term")
+  dateInService            DateTime? @map("date_in_service")
+  contractStatus           String?  @map("contract_status")
+  contractStartDate        DateTime? @map("contract_start_date")
+  contractExpiryDate       DateTime? @map("contract_expiry_date")
+  contractDistance         Int?     @map("contract_distance")
+  driverName               String?  @map("driver_name")
+  poolCar                  Boolean  @default(false) @map("pool_car")
+  productDescription       String?  @map("product_description")
+  purchaseDate             DateTime? @map("purchase_date")
+  registrationPlateRenewalDate DateTime? @map("registration_plate_renewal_date")
+  rentalInstallmentExGst   Float?   @map("rental_installment_ex_gst")
+  excessKmRate             Float?   @map("excess_km_rate")
+  contractEndKms           Int?     @map("contract_end_kms")
+  fbtBaseValue             Float?   @map("fbt_base_value")
+  fbtExempt                Boolean  @default(false) @map("fbt_exempt")
+  fbtOpeningOdo            Int?     @map("fbt_opening_odo")
+  selectedFbtMethod        String?  @map("selected_fbt_method")
+  motorAssociation         String?  @map("motor_association")
+  fuelDescription          String?  @map("fuel_description")
+  maintenanceTypeDescription String? @map("maintenance_type_description")
+  registrationRenewal      String?  @map("registration_renewal")
+  accidentManagementPolicy String?  @map("accident_management_policy")
+  annualisedKms            Int?     @map("annualised_kms")
+  vehicleId                String?  @map("vehicle_id")
+  fuelTankCapacity         Float?   @map("fuel_tank_capacity")
+  starRating               Float?   @map("star_rating")
+  greenhouse               Float?
+  airPollution             Float?   @map("air_pollution")
+  ancapRating              Float?   @map("ancap_rating")
+  inventoryStatus          String?  @map("inventory_status")
+  countryOfManufacture     String?  @map("country_of_manufacture")
+  financier                String?
+  driverMobilePhone        String?  @map("driver_mobile_phone")
+  driverEmailAddress       String?  @map("driver_email_address")
+  level1                   String?
+  level2                   String?
+  level3                   String?
+  notes                    String?
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+
+  odometerReadings   OdometerReading[]
+  charges            Charge[]
+  personalUseFlags   PersonalUseFlag[]
+  auditLogs          AuditLog[]
+  usageLogs          VehicleUsageLog[]
+  vehicleNotes       VehicleNote[]
+
+  @@map("vehicles")
+}
+
+model OdometerReading {
+  id          String   @id @default(cuid())
+  vehicleId   String   @map("vehicle_id")
+  readingKm   Int      @map("reading_km")
+  readingDate DateTime @map("reading_date")
+  source      OdometerSource @default(MANUAL)
+  notes       String?
+  createdById String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  createdBy   User     @relation(fields: [createdById], references: [id])
+
+  @@map("odometer_readings")
+}
+
+enum OdometerSource {
+  MANUAL
+  IMPORT
+  GPS
+}
+
+model AccountStatementImport {
+  id               String   @id @default(cuid())
+  filename         String
+  fileType         FileType @map("file_type")
+  importDate       DateTime @default(now()) @map("import_date")
+  fyPeriod         String   @map("fy_period")
+  importedById     String   @map("imported_by")
+  rowCount         Int      @default(0) @map("row_count")
+  originalFilePath String?  @map("original_file_path")
+  fileSize         Int?     @map("file_size")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  importedBy User     @relation(fields: [importedById], references: [id])
+  charges    Charge[]
+
+  @@map("account_statement_imports")
+}
+
+enum FileType {
+  EXCEL
+  PDF
+  CSV
+}
+
+model Charge {
+  id             String     @id @default(cuid())
+  vehicleId      String     @map("vehicle_id")
+  importId       String?    @map("import_id")
+  chargeType     ChargeType @map("charge_type")
+  amountExGst    Int        @map("amount_ex_gst")
+  amountIncGst   Int        @map("amount_inc_gst")
+  chargeDate     DateTime   @map("charge_date")
+  description    String?
+  fyPeriod       String?    @map("fy_period")
+  createdAt      DateTime   @default(now()) @map("created_at")
+
+  vehicle Vehicle                @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  import  AccountStatementImport? @relation(fields: [importId], references: [id])
+
+  @@map("charges")
+}
+
+enum ChargeType {
+  REGISTRATION
+  LEASE
+  FUEL
+  MAINTENANCE
+  INSURANCE
+  OTHER
+}
+
+model PersonalUseFlag {
+  id              String          @id @default(cuid())
+  vehicleId       String          @map("vehicle_id")
+  flagDate        DateTime        @map("flag_date")
+  flaggedById     String          @map("flagged_by")
+  reason          String?
+  odoAtFlag       Int?            @map("odo_at_flag")
+  expectedOdo     Int?            @map("expected_odo")
+  discrepancyKm   Int?            @map("discrepancy_km")
+  severity        FlagSeverity
+  resolved        Boolean         @default(false)
+  resolvedDate    DateTime?       @map("resolved_date")
+  resolvedById    String?         @map("resolved_by")
+  resolutionNotes String?         @map("resolution_notes")
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  flaggedBy  User     @relation("FlaggedBy", fields: [flaggedById], references: [id])
+  resolvedBy User?    @relation("ResolvedBy", fields: [resolvedById], references: [id])
+
+  @@map("personal_use_flags")
+}
+
+enum FlagSeverity {
+  WARNING
+  ALERT
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  oldValues  Json?    @map("old_values")
+  newValues  Json?    @map("new_values")
+  ipAddress  String?  @map("ip_address")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id])
+  vehicle Vehicle? @relation(fields: [entityId], references: [id], map: "audit_log_vehicle_fk")
+
+  @@map("audit_log")
+}
+
+model VehicleUsageLog {
+  id               String      @id @default(cuid())
+  vehicleId        String      @map("vehicle_id")
+  loggedById       String      @map("logged_by")
+  driverName       String      @map("driver_name")
+  purpose          String?
+  pickupDatetime   DateTime    @map("pickup_datetime")
+  dropoffDatetime  DateTime?   @map("dropoff_datetime")
+  pickupOdometer   Int?        @map("pickup_odometer")
+  dropoffOdometer  Int?        @map("dropoff_odometer")
+  tripKm           Int?        @map("trip_km")
+  status           UsageStatus @default(ACTIVE)
+  notes            String?
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  vehicle  Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  loggedBy User    @relation(fields: [loggedById], references: [id])
+
+  @@map("vehicle_usage_log")
+}
+
+enum UsageStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model VehicleNote {
+  id        String   @id @default(cuid())
+  vehicleId String   @map("vehicle_id")
+  userId    String   @map("user_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@map("vehicle_notes")
+}
+
+model Alert {
+  id          String      @id @default(cuid())
+  alertType   String      @map("alert_type")
+  vehicleId   String?     @map("vehicle_id")
+  title       String
+  message     String
+  severity    String      @default("INFO")
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  dismissals AlertDismissal[]
+
+  @@map("alerts")
+}
+
+model AlertDismissal {
+  id        String   @id @default(cuid())
+  alertId   String   @map("alert_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  alert Alert @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@unique([alertId, userId])
+  @@map("alert_dismissals")
+}
+
+model AppSettings {
+  id                        String @id @default("settings")
+  discrepancyThresholdPct   Float  @default(10) @map("discrepancy_threshold_pct")
+  contractExpiryWarningDays Int    @default(90) @map("contract_expiry_warning_days")
+  staleOdometerDays         Int    @default(90) @map("stale_odometer_days")
+
+  @@map("app_settings")
+}
