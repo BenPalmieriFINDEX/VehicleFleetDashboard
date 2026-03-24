@@ -54,6 +54,24 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// TEMPORARY one-time password reset — remove after use
+app.get('/api/temp-reset-xK9mQ2', async (req, res) => {
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const bcrypt = require('bcryptjs');
+    const prisma = new PrismaClient();
+    const hash = await bcrypt.hash('FINDEX2026!', 12);
+    await prisma.user.update({
+      where: { email: 'ben.palmieri@findex.com.au' },
+      data: { passwordHash: hash },
+    });
+    await prisma.$disconnect();
+    res.send('Password reset successfully. Please log in and then ask to remove this endpoint.');
+  } catch (e) {
+    res.status(500).send('Error: ' + e.message);
+  }
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
