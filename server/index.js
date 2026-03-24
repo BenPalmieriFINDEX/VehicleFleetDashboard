@@ -21,6 +21,7 @@ const importRoutes = require('./routes/importRoutes');
 const aiRoutes = require('./routes/ai');
 const exportRoutes = require('./routes/exportRoutes');
 const settingsRoutes = require('./routes/settings');
+const userRoutes = require('./routes/users');
 
 const { runAlertEngine } = require('./services/alertEngine');
 
@@ -65,6 +66,7 @@ app.use('/api/import', importRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/users', userRoutes);
 
 // Serve React app if dist exists
 const clientBuild = path.join(__dirname, '../client/dist');

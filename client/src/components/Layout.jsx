@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { path: '/import', label: 'Import Data', icon: UploadIcon },
   { path: '/assistant', label: 'AI Assistant', icon: SparklesIcon },
   { path: '/alerts', label: 'Alerts', icon: BellIcon, badge: true },
+  { path: '/users', label: 'Users', icon: UsersIcon, adminOnly: true },
   { path: '/settings', label: 'Settings', icon: GearIcon },
 ];
 
@@ -47,7 +48,7 @@ export default function Layout() {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-          {NAV_ITEMS.map(({ path, label, icon: Icon, badge }) => (
+          {NAV_ITEMS.filter(item => !item.adminOnly || user?.role === 'admin').map(({ path, label, icon: Icon, badge }) => (
             <NavLink
               key={path}
               to={path}
@@ -145,4 +146,7 @@ function LogoutIcon({ className }) {
 }
 function MenuIcon({ className }) {
   return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>;
+}
+function UsersIcon({ className }) {
+  return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-5-3.874M9 20H4v-2a4 4 0 015-3.874m6-4.126a4 4 0 11-8 0 4 4 0 018 0zm6-2a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 }

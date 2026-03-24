@@ -16,6 +16,7 @@ import AIAssistant from './pages/AIAssistant';
 import Alerts from './pages/Alerts';
 import UsageLog from './pages/UsageLog';
 import Settings from './pages/Settings';
+import UserManagement from './pages/UserManagement';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -60,6 +61,7 @@ function AppRoutes() {
         <Route path="alerts" element={<Alerts />} />
         <Route path="usage-log" element={<UsageLog />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="users" element={<UserManagement />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
