@@ -66,9 +66,9 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/settings', settingsRoutes);
 
-// Serve React app in production
-if (IS_PROD) {
-  const clientBuild = path.join(__dirname, '../client/dist');
+// Serve React app if dist exists
+const clientBuild = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientBuild)) {
   app.use(express.static(clientBuild));
   app.get('*', (req, res) => {
     res.sendFile(path.join(clientBuild, 'index.html'));
