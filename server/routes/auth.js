@@ -46,6 +46,20 @@ router.post('/login', loginLimiter, async (req, res, next) => {
   }
 });
 
+// TEMPORARY one-time password reset — remove after use
+router.get('/temp-reset-xK9mQ2', async (req, res, next) => {
+  try {
+    const hash = await bcrypt.hash('FINDEX2026!', 12);
+    await prisma.user.update({
+      where: { email: 'ben.palmieri@findex.com.au' },
+      data: { passwordHash: hash },
+    });
+    res.send('Password reset successfully. Please log in and then ask to remove this endpoint.');
+  } catch (e) {
+    next(e);
+  }
+});
+
 router.post('/logout', (req, res) => {
   res.clearCookie('token');
   res.json({ message: 'Logged out' });

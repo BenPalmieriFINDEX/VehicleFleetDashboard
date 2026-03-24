@@ -14,20 +14,6 @@ function adminOnly(req, res, next) {
   next();
 }
 
-// TEMPORARY one-time password reset — remove after use
-router.get('/temp-reset-xK9mQ2', async (req, res, next) => {
-  try {
-    const hash = await bcrypt.hash('FINDEX2026!', 12);
-    await prisma.user.update({
-      where: { email: 'ben.palmieri@findex.com.au' },
-      data: { passwordHash: hash },
-    });
-    res.send('Password reset successfully. Please log in and then ask to remove this endpoint.');
-  } catch (e) {
-    next(e);
-  }
-});
-
 // List all users
 router.get('/', authMiddleware, adminOnly, async (req, res, next) => {
   try {
