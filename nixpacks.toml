@@ -1,0 +1,14 @@
+[phases.install]
+cmds = [
+  "npm install --prefix server",
+  "npm install --prefix client"
+]
+
+[phases.build]
+cmds = [
+  "server/node_modules/.bin/prisma generate --schema server/prisma/schema.prisma",
+  "npm run build --prefix client"
+]
+
+[start]
+cmd = "node server/index.js"
