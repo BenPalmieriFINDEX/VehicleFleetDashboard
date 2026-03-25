@@ -10,52 +10,60 @@ process.on('unhandledRejection', (reason) => {
   process.exit(1);
 });
 
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
-const path = require('path');
-const fs = require('fs');
+console.log('[BOOT] Loading modules...');
 
-const errorHandler = require('./middleware/errorHandler');
+let express, cors, helmet, cookieParser, path, fs;
+let errorHandler;
+let authRoutes, vehicleRoutes, personalUseRoutes, contractRoutes;
+let usageLogRoutes, alertRoutes, reportingRoutes, importRoutes;
+let aiRoutes, exportRoutes, settingsRoutes, userRoutes;
+let runAlertEngine;
 
-// Routes
-const authRoutes = require('./routes/auth');
-const vehicleRoutes = require('./routes/vehicles');
-const personalUseRoutes = require('./routes/personalUse');
-const contractRoutes = require('./routes/contracts');
-const usageLogRoutes = require('./routes/usageLog');
-const alertRoutes = require('./routes/alerts');
-const reportingRoutes = require('./routes/reporting');
-const importRoutes = require('./routes/importRoutes');
-const aiRoutes = require('./routes/ai');
-const exportRoutes = require('./routes/exportRoutes');
-const settingsRoutes = require('./routes/settings');
-const userRoutes = require('./routes/users');
+try {
+  express     = require('express');
+  cors        = require('cors');
+  helmet      = require('helmet');
+  cookieParser = require('cookie-parser');
+  path        = require('path');
+  fs          = require('fs');
+  console.log('[BOOT] Core modules loaded');
 
-const { runAlertEngine } = require('./services/alertEngine');
+  errorHandler       = require('./middleware/errorHandler');
+  authRoutes         = require('./routes/auth');
+  vehicleRoutes      = require('./routes/vehicles');
+  personalUseRoutes  = require('./routes/personalUse');
+  contractRoutes     = require('./routes/contracts');
+  usageLogRoutes     = require('./routes/usageLog');
+  alertRoutes        = require('./routes/alerts');
+  reportingRoutes    = require('./routes/reporting');
+  importRoutes       = require('./routes/importRoutes');
+  aiRoutes           = require('./routes/ai');
+  exportRoutes       = require('./routes/exportRoutes');
+  settingsRoutes     = require('./routes/settings');
+  userRoutes         = require('./routes/users');
+  ({ runAlertEngine } = require('./services/alertEngine'));
+  console.log('[BOOT] All routes loaded');
+} catch (err) {
+  console.error('[FATAL] Module load failed:', err);
+  process.exit(1);
+}
+
 const { exec } = require('child_process');
-
-const app = express();
+const app  = express();
 const PORT = process.env.PORT || 3001;
 const IS_PROD = process.env.NODE_ENV === 'production';
+
+console.log(`[BOOT] PORT=${PORT} NODE_ENV=${process.env.NODE_ENV}`);
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
-// Security headers
-app.use(helmet({
-  contentSecurityPolicy: false, // Disabled for SPA
-  crossOriginEmbedderPolicy: false,
-}));
-
-// CORS — in production, served same origin; in dev allow Vite dev server
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(cors({
   origin: IS_PROD ? false : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
 }));
-
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
@@ -64,7 +72,6 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -91,13 +98,11 @@ if (fs.existsSync(clientBuild)) {
 
 app.use(errorHandler);
 
+console.log('[BOOT] Starting server...');
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n[READY] FINDEX Fleet Dashboard listening on 0.0.0.0:${PORT}`);
-  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`[READY] Listening on 0.0.0.0:${PORT}`);
 
-  // In production, run db push + seed in the background AFTER the server is
-  // already listening so Railway's healthcheck can pass immediately.
-  if (process.env.NODE_ENV === 'production') {
+  if (IS_PROD) {
     console.log('[Startup] Running prisma db push + seed in background...');
     exec(
       'npx prisma db push --accept-data-loss && npx prisma db seed',
@@ -108,7 +113,6 @@ app.listen(PORT, '0.0.0.0', () => {
         } else {
           console.log('[Startup] DB schema + seed complete.');
         }
-        // Run alert engine after migrations finish
         try {
           await runAlertEngine();
         } catch (e) {
@@ -117,7 +121,6 @@ app.listen(PORT, '0.0.0.0', () => {
       }
     );
   } else {
-    // Dev: alert engine only, no migrations
     runAlertEngine().catch(err =>
       console.error('[AlertEngine] Startup check failed:', err.message)
     );
