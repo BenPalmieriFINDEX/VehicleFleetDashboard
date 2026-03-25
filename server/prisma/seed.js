@@ -35,7 +35,7 @@ function deriveCountry(state) {
 }
 
 function generatePassword(length = 16) {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#$%';
   let pwd = '';
   for (let i = 0; i < length; i++) {
     pwd += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -479,7 +479,7 @@ async function main() {
   const createdUsers = [];
   console.log('👤 Creating users...');
   for (const userData of USERS) {
-    const password = process.env.SEED_PASSWORD || 'Findex2024!';
+    const password = process.env.SEED_PASSWORD || 'Findex2024';
     const passwordHash = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.upsert({
