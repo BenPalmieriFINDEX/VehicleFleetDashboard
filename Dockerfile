@@ -31,4 +31,4 @@ COPY server ./server/
 EXPOSE 3001
 
 ENV NODE_ENV=production
-CMD ["sh", "-c", "cd server && npx prisma db push --accept-data-loss && npx prisma db seed && cd /app && node server/index.js"]
+CMD ["node", "server/index.js"]

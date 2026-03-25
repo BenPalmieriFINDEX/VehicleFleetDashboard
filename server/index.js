@@ -24,6 +24,7 @@ const settingsRoutes = require('./routes/settings');
 const userRoutes = require('./routes/users');
 
 const { runAlertEngine } = require('./services/alertEngine');
+const { exec } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -80,15 +81,36 @@ if (fs.existsSync(clientBuild)) {
 
 app.use(errorHandler);
 
-app.listen(PORT, async () => {
-  console.log(`\n🚀 FINDEX Fleet Dashboard running on port ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`\n FINDEX Fleet Dashboard running on port ${PORT}`);
   console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
 
-  // Run alert engine on startup
-  try {
-    await runAlertEngine();
-  } catch (err) {
-    console.error('[AlertEngine] Startup check failed:', err.message);
+  // In production, run db push + seed in the background AFTER the server is
+  // already listening so Railway's healthcheck can pass immediately.
+  if (process.env.NODE_ENV === 'production') {
+    console.log('[Startup] Running prisma db push + seed in background...');
+    exec(
+      'npx prisma db push --accept-data-loss && npx prisma db seed',
+      { cwd: __dirname },
+      async (err) => {
+        if (err) {
+          console.error('[Startup] prisma db push/seed error:', err.message);
+        } else {
+          console.log('[Startup] DB schema + seed complete.');
+        }
+        // Run alert engine after migrations finish
+        try {
+          await runAlertEngine();
+        } catch (e) {
+          console.error('[AlertEngine] Startup check failed:', e.message);
+        }
+      }
+    );
+  } else {
+    // Dev: alert engine only, no migrations
+    runAlertEngine().catch(err =>
+      console.error('[AlertEngine] Startup check failed:', err.message)
+    );
   }
 });
 
