@@ -19,7 +19,10 @@ RUN cd client && npm run build
 COPY server ./server/
 RUN cd server && npx prisma generate
 
+COPY start.sh ./start.sh
+RUN chmod +x start.sh
+
 EXPOSE 3001
 
 ENV NODE_ENV=production
-CMD ["node", "server/index.js"]
+CMD ["sh", "start.sh"]
