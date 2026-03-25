@@ -91,8 +91,8 @@ if (fs.existsSync(clientBuild)) {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`\n FINDEX Fleet Dashboard running on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n[READY] FINDEX Fleet Dashboard listening on 0.0.0.0:${PORT}`);
   console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
 
   // In production, run db push + seed in the background AFTER the server is
