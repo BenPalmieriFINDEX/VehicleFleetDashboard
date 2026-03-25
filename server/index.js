@@ -105,7 +105,7 @@ app.listen(PORT, '0.0.0.0', () => {
   if (IS_PROD) {
     console.log('[Startup] Running prisma db push + seed in background...');
     exec(
-      'npx prisma db push --accept-data-loss && npx prisma db seed',
+      './node_modules/.bin/prisma db push --accept-data-loss && node prisma/seed.js',
       { cwd: __dirname },
       async (err) => {
         if (err) {
