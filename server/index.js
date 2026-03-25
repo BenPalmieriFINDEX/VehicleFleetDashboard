@@ -1,5 +1,15 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 
+// Catch any crash and log it before Railway kills the container
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught exception:', err);
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL] Unhandled rejection:', reason);
+  process.exit(1);
+});
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
